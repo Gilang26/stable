@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>THDX • LayerZero Bridge v5.3.2</title>
+<title>THDX • LayerZero Bridge v5.3.3</title>
 <meta name="theme-color" content="#0b1220">
 <style>
 :root {
@@ -55,7 +55,7 @@ pre{
 <body>
 <div class="card">
   <h1>THDX Bridge</h1>
-  <p class="sub">LayerZero Mini Bridge • Sepolia → Stable Testnet</p>
+  <p class="sub">LayerZero • Sepolia → Stable Testnet</p>
 
   <label>Adapter OFT (LayerZero)</label>
   <input id="adapter" value="0xc099cD946d5efCC35A99D64E808c1430cEf08126">
@@ -143,38 +143,29 @@ function initTHDX(){
       log(`1️⃣ Estimating fee...`);
 
       const fee=await oft.quoteSend(sendParam,false);
-      let nativeFeeRaw;
-      try {
-        if (Array.isArray(fee)) {
-          nativeFeeRaw = fee[0];
-        } else if (fee && fee.nativeFee !== undefined) {
-          nativeFeeRaw = fee.nativeFee;
-        } else if (fee && typeof fee === "object") {
-          const firstVal = Object.values(fee)[0];
-          nativeFeeRaw = firstVal;
-        } else {
-          throw new Error("Format fee tidak dikenali: " + JSON.stringify(fee));
+      // === Force Deep Decode ===
+      const extractDeep=(x)=>{
+        if(!x)return null;
+        if(ethers.BigNumber.isBigNumber(x))return x;
+        if(typeof x==="string")return x;
+        if(typeof x==="object"){
+          if(x._hex)return x._hex;
+          const vals=Object.values(x);
+          for(const v of vals){
+            const res=extractDeep(v);
+            if(res)return res;
+          }
         }
-      } catch (err) {
-        console.error("Fee parse error:", fee, err);
-        throw new Error("Gagal membaca format fee dari kontrak.");
-      }
+        return null;
+      };
+      const nativeFeeRaw=extractDeep(fee);
+      if(!nativeFeeRaw)throw new Error("Gagal membaca nativeFee dari kontrak.");
 
-      let nativeFee;
-      try {
-        if (ethers.BigNumber.isBigNumber(nativeFeeRaw)) {
-          nativeFee = nativeFeeRaw;
-        } else if (typeof nativeFeeRaw === "object" && nativeFeeRaw._hex) {
-          nativeFee = ethers.BigNumber.from(nativeFeeRaw._hex);
-        } else if (typeof nativeFeeRaw === "string") {
-          nativeFee = ethers.BigNumber.from(nativeFeeRaw);
-        } else {
-          nativeFee = ethers.BigNumber.from(nativeFeeRaw.toString());
-        }
-      } catch (err) {
-        console.error("nativeFee convert error:", nativeFeeRaw, err);
-        throw new Error("invalid BigNumber format dari nativeFee");
-      }
+      const nativeFee=ethers.BigNumber.from(
+        ethers.BigNumber.isBigNumber(nativeFeeRaw)
+          ? nativeFeeRaw
+          : (typeof nativeFeeRaw==="string"?nativeFeeRaw:nativeFeeRaw.toString())
+      );
 
       const feeStruct=[nativeFee,ethers.BigNumber.from(0)];
       const senderAddr=await signer.getAddress();
