@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>THDX • LayerZero Bridge v5.3.1</title>
+<title>THDX • LayerZero Bridge v5.3.2</title>
 <meta name="theme-color" content="#0b1220">
 <style>
 :root {
@@ -141,19 +141,40 @@ function initTHDX(){
       const oft=new ethers.Contract(adapter,OFT_ABI,signer);
       const sendParam={dstEid,to:to32,amountLD,minAmountLD:amountLD,extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"};
       log(`1️⃣ Estimating fee...`);
+
       const fee=await oft.quoteSend(sendParam,false);
-
-      // 🔧 Universal handler
       let nativeFeeRaw;
-      if(Array.isArray(fee)) nativeFeeRaw=fee[0];
-      else if(fee && fee.nativeFee!==undefined) nativeFeeRaw=fee.nativeFee;
-      else throw new Error("Unexpected fee format dari quoteSend()");
+      try {
+        if (Array.isArray(fee)) {
+          nativeFeeRaw = fee[0];
+        } else if (fee && fee.nativeFee !== undefined) {
+          nativeFeeRaw = fee.nativeFee;
+        } else if (fee && typeof fee === "object") {
+          const firstVal = Object.values(fee)[0];
+          nativeFeeRaw = firstVal;
+        } else {
+          throw new Error("Format fee tidak dikenali: " + JSON.stringify(fee));
+        }
+      } catch (err) {
+        console.error("Fee parse error:", fee, err);
+        throw new Error("Gagal membaca format fee dari kontrak.");
+      }
 
-      const nativeFee=ethers.BigNumber.from(
-        typeof nativeFeeRaw==="string"?nativeFeeRaw:
-        nativeFeeRaw._hex?nativeFeeRaw._hex:
-        nativeFeeRaw.toString()
-      );
+      let nativeFee;
+      try {
+        if (ethers.BigNumber.isBigNumber(nativeFeeRaw)) {
+          nativeFee = nativeFeeRaw;
+        } else if (typeof nativeFeeRaw === "object" && nativeFeeRaw._hex) {
+          nativeFee = ethers.BigNumber.from(nativeFeeRaw._hex);
+        } else if (typeof nativeFeeRaw === "string") {
+          nativeFee = ethers.BigNumber.from(nativeFeeRaw);
+        } else {
+          nativeFee = ethers.BigNumber.from(nativeFeeRaw.toString());
+        }
+      } catch (err) {
+        console.error("nativeFee convert error:", nativeFeeRaw, err);
+        throw new Error("invalid BigNumber format dari nativeFee");
+      }
 
       const feeStruct=[nativeFee,ethers.BigNumber.from(0)];
       const senderAddr=await signer.getAddress();
