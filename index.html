@@ -19,7 +19,6 @@
   .muted{background:#1b263b} button:disabled{opacity:.55;cursor:not-allowed}
   pre{margin-top:12px;white-space:pre-wrap;background:#0f1625;border:1px solid var(--stroke);border-radius:10px;padding:12px;min-height:120px;font-size:12.5px}
   .hint{color:var(--muted);font-size:12px;margin-top:6px}
-  /* toast */
   #toasts{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:9999}
   .toast{background:#1c253b;color:#e6e8ff;border-left:5px solid var(--g2);padding:10px 12px;border-radius:10px;box-shadow:0 6px 12px rgba(0,0,0,.35);font-size:13px}
   .success{border-left-color:#22c55e}.error{border-left-color:#ef4444}
@@ -37,7 +36,6 @@
       <option value="wh">Wormhole (opsional)</option>
     </select>
 
-    <!-- OFT (LayerZero) block -->
     <div id="lzBox">
       <div class="grid2">
         <div>
@@ -61,7 +59,6 @@
       </div>
     </div>
 
-    <!-- Wormhole block (optional) -->
     <div id="whBox" style="display:none">
       <div class="grid2">
         <div>
@@ -109,7 +106,6 @@
 
 <div id="toasts"></div>
 
-<!-- Ethers loader (fallback aman HP) -->
 <script>
 (function loadEthers(){
   const add=(src,cb)=>{const s=document.createElement('script');s.src=src;s.onload=cb;s.onerror=()=>console.error('Gagal load',src);document.body.appendChild(s)};
@@ -129,12 +125,10 @@ function initTHDX(){
   const addrTo32 = (addr)=>"0x"+"0".repeat(64-40)+addr.toLowerCase().replace(/^0x/,"");
   const parseAmount = (x,dec)=>ethers.utils.parseUnits(String(x), dec);
 
-  // ABIs
   const ERC20_ABI = ["function approve(address spender,uint256 value) returns(bool)"];
-  // LayerZero OFT minimal
   const OFT_ABI = [
-    "function quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool) view returns (uint256 nativeFee,uint256 zroFee)",
-    "function send((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address) payable"
+    "function quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)view returns(uint256 nativeFee,uint256 zroFee)",
+    "function send((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)payable"
   ];
 
   async function ensureSepolia(){
@@ -149,7 +143,6 @@ function initTHDX(){
     }
   }
 
-  // UI mode switch (show/hide blocks)
   $("#bridgeType").onchange = () =>{
     const mode = $("#bridgeType").value;
     $("#lzBox").style.display = (mode==="lz")?"block":"none";
@@ -171,29 +164,18 @@ function initTHDX(){
     }catch(e){ log("❌ Connect error: "+(e.message||e)); toast("Gagal connect","error"); }
   };
 
-  // Approve (OFT: approve token -> adapter) / (WH: approve token -> tokenBridge)
   $("#btnApprove").onclick = async ()=>{
     try{
       await ensureSepolia();
       const mode = $("#bridgeType").value;
       let token, spender, decimals;
-
-      if(mode==="lz"){
-        token = $("#lzToken").value.trim();
-        spender = $("#lzAdapter").value.trim();
-        decimals = parseInt($("#lzDecimals").value || "6",10);
-      } else {
-        token = $("#whToken").value.trim();
-        spender = $("#whBridge").value.trim();
-        decimals = parseInt($("#whDec").value || "6",10);
-      }
-      const amount = $("#amount").value.trim();
-      if(!amount) throw new Error("Isi jumlah dulu.");
-      const amountLD = parseAmount(amount, decimals);
-
-      const erc20 = new ethers.Contract(token, ERC20_ABI, signer);
+      if(mode==="lz"){ token=$("#lzToken").value.trim(); spender=$("#lzAdapter").value.trim(); decimals=parseInt($("#lzDecimals").value||"6",10);}
+      else { token=$("#whToken").value.trim(); spender=$("#whBridge").value.trim(); decimals=parseInt($("#whDec").value||"6",10);}
+      const amount=$("#amount").value.trim(); if(!amount) throw new Error("Isi jumlah dulu.");
+      const amountLD=parseAmount(amount,decimals);
+      const erc20=new ethers.Contract(token,ERC20_ABI,signer);
       log(`🧾 Approve ${mode.toUpperCase()}...`);
-      const tx = await erc20.approve(spender, amountLD);
+      const tx=await erc20.approve(spender,amountLD);
       log(`⏳ Approve TX: ${tx.hash}`);
       await tx.wait();
       log("✅ Approve sukses!"); toast("Approve sukses ✅");
@@ -203,57 +185,47 @@ function initTHDX(){
   $("#btnBridge").onclick = async ()=>{
     try{
       await ensureSepolia();
-      const mode = $("#bridgeType").value;
-      const recipient = ($("#recipient").value || me).trim();
+      const mode=$("#bridgeType").value;
+      const recipient=($("#recipient").value||me).trim();
       if(!/^0x[0-9a-fA-F]{40}$/.test(recipient)) throw new Error("Alamat penerima invalid.");
 
       if(mode==="lz"){
-        const adapter = $("#lzAdapter").value.trim();
-        const token = $("#lzToken").value.trim();
-        const dstEid = parseInt($("#lzDstEid").value,10);
-        const decimals = parseInt($("#lzDecimals").value||"6",10);
-        const amountLD = parseAmount($("#amount").value.trim(), decimals);
+        const adapter=$("#lzAdapter").value.trim();
+        const dstEid=parseInt($("#lzDstEid").value,10);
+        const decimals=parseInt($("#lzDecimals").value||"6",10);
+        const amountLD=parseAmount($("#amount").value.trim(),decimals);
 
-        // quote + send
-        const oft = new ethers.Contract(adapter, OFT_ABI, signer);
-        const sendParam = {
-          dstEid,
-          to: addrTo32(recipient),
-          amountLD: amountLD,
-          minAmountLD: amountLD,
-          extraOptions: "0x",     // Options.newOptions().addExecutorLzReceiveOption(0,0)
-          composeMsg: "0x",
-          oftCmd: "0x"
-        };
+        const oft=new ethers.Contract(adapter,OFT_ABI,signer);
+        const sendParam={dstEid,to:addrTo32(recipient),amountLD,minAmountLD:amountLD,extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"};
+
         log(`🚀 LZ send: dstEid=${dstEid}, amountLD=${amountLD.toString()}`);
-        const fee = await oft.quoteSend(sendParam, false);
+        const fee=await oft.quoteSend(sendParam,false);
+        const feeStruct={nativeFee:fee.nativeFee,zroFee:ethers.BigNumber.from(0)};
         log(`💰 Fee estimate: ${ethers.utils.formatEther(fee.nativeFee)} ETH`);
-
-        const tx = await oft.send(sendParam, { nativeFee: fee.nativeFee, zroFee: 0 }, me, { value: fee.nativeFee });
-        log(`⏳ TX: ${tx.hash}`); toast("OFT send terkirim 🚀");
+        const tx=await oft.send(sendParam,feeStruct,me,{value:fee.nativeFee});
+        log(`⏳ TX: ${tx.hash}`);
+        toast("OFT send terkirim 🚀");
         await tx.wait();
         log("✅ Bridge (OFT) sukses! Tunggu penerimaan di Stable testnet.");
       } else {
-        // Wormhole opsi — hanya jika kamu isi benar & token terdaftar
-        const whBridge = $("#whBridge").value.trim();
-        const token = $("#whToken").value.trim();
-        const dec = parseInt($("#whDec").value||"6",10);
-        const dstChain = parseInt($("#whDst").value||"0",10);
+        const whBridge=$("#whBridge").value.trim();
+        const token=$("#whToken").value.trim();
+        const dec=parseInt($("#whDec").value||"6",10);
+        const dstChain=parseInt($("#whDst").value||"0",10);
         if(!dstChain) throw new Error("Isi dst Wormhole chainID terlebih dulu.");
-        const amountLD = parseAmount($("#amount").value.trim(), dec);
-
-        const bridge = new ethers.Contract(whBridge, [
-          "function transferTokens(address,uint256,uint16,bytes32,uint256,uint32)"
-        ], signer);
+        const amountLD=parseAmount($("#amount").value.trim(),dec);
+        const bridge=new ethers.Contract(whBridge,["function transferTokens(address,uint256,uint16,bytes32,uint256,uint32)"],signer);
         log(`🚀 WH transferTokens ke chain ${dstChain}...`);
-        const nonce = Math.floor(Math.random()*1e9);
-        const tx = await bridge.transferTokens(token, amountLD, dstChain, addrTo32(recipient), 0, nonce, { gasLimit: 300000 });
-        log(`⏳ TX: ${tx.hash}`); await tx.wait();
-        log("✅ Bridge (Wormhole) sukses! (Pastikan token terdaftar di testnet mereka)");
+        const nonce=Math.floor(Math.random()*1e9);
+        const tx=await bridge.transferTokens(token,amountLD,dstChain,addrTo32(recipient),0,nonce,{gasLimit:300000});
+        log(`⏳ TX: ${tx.hash}`);
+        await tx.wait();
+        log("✅ Bridge (Wormhole) sukses!");
       }
     }catch(e){
       const msg=(e.error&&e.error.message)||e.reason||e.message||String(e);
-      log("❌ Bridge error: "+msg); toast("Bridge gagal","error");
+      log("❌ Bridge error: "+msg);
+      toast("Bridge gagal","error");
       if(/execution reverted/i.test(msg)) log("💡 Hint: periksa dstEid/chainId & apakah token/adapter benar.");
       if(/UNPREDICTABLE_GAS_LIMIT/i.test(msg)) log("💡 Hint: allowance cukup? alamat benar? jumlah tidak terlalu kecil?");
     }
