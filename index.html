@@ -1,80 +1,84 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>THDX • LayerZero Bridge v5.2</title>
-<meta name="theme-color" content="#0b1220" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>THDX • LayerZero Bridge v5.3</title>
+<meta name="theme-color" content="#0b1220">
 <style>
-  :root {
-    --bg:#0b0e17;--card:#121726;--stroke:#222c42;
-    --text:#e6edf3;--accent1:#7c5cff;--accent2:#6ee7ff;
-    --ok1:#22c55e;--err:#ef4444;
-  }
-  *{box-sizing:border-box}
-  body {
-    margin:0;min-height:100svh;display:grid;place-items:center;
-    background:radial-gradient(circle at top,#0e1222,#06080f);
-    color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;
-  }
-  .card {
-    width:min(480px,90vw);background:var(--card);border:1px solid var(--stroke);
-    border-radius:16px;padding:28px;text-align:center;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
-    backdrop-filter:blur(10px);
-  }
-  h1 {
-    color:var(--accent1);margin:0;font-size:24px;font-weight:700;
-    background:linear-gradient(90deg,var(--accent1),var(--accent2));
-    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  }
-  p.sub{color:#9aa6b2;margin:6px 0 18px}
-  label{display:block;text-align:left;margin:10px 0 4px;font-size:13px;font-weight:600}
-  input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--stroke);
-    background:#0f1524;color:#fff;font-size:14px}
-  button{
-    width:100%;padding:12px;margin-top:10px;border:0;border-radius:10px;
-    color:#fff;font-weight:700;cursor:pointer;transition:.2s;font-size:15px
-  }
-  button.primary{background:linear-gradient(90deg,var(--accent2),var(--accent1))}
-  button.ok{background:linear-gradient(90deg,#22c55e,#16a34a)}
-  button:disabled{opacity:.55;cursor:not-allowed}
-  pre{
-    background:#0e1422;border:1px solid var(--stroke);border-radius:10px;
-    padding:12px;margin-top:12px;font-size:12.5px;white-space:pre-wrap;text-align:left;
-    color:#d0d8e6;min-height:110px;
-  }
-  #footer{margin-top:18px;color:#707d93;font-size:12px}
-  #footer b{color:var(--accent1)}
+:root {
+  --bg:#0b0e17;--card:#121726;--stroke:#222c42;
+  --text:#e6edf3;--accent1:#7c5cff;--accent2:#6ee7ff;
+  --ok1:#22c55e;--err:#ef4444;
+}
+*{box-sizing:border-box}
+body {
+  margin:0;min-height:100svh;display:grid;place-items:center;
+  background:radial-gradient(circle at top,#0f1222,#06080f);
+  color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;
+}
+.card {
+  width:min(480px,90vw);background:var(--card);
+  border:1px solid var(--stroke);border-radius:16px;
+  padding:28px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.45);
+  backdrop-filter:blur(10px);
+}
+h1{
+  color:var(--accent1);margin:0;font-size:24px;font-weight:700;
+  background:linear-gradient(90deg,var(--accent1),var(--accent2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+p.sub{color:#9aa6b2;margin:6px 0 18px}
+label{display:block;text-align:left;margin:10px 0 4px;font-size:13px;font-weight:600}
+input{
+  width:100%;padding:12px;border-radius:10px;border:1px solid var(--stroke);
+  background:#0f1524;color:#fff;font-size:14px
+}
+button{
+  width:100%;padding:12px;margin-top:10px;border:0;border-radius:10px;
+  color:#fff;font-weight:700;cursor:pointer;transition:.2s;font-size:15px
+}
+button.primary{background:linear-gradient(90deg,var(--accent2),var(--accent1))}
+button.ok{background:linear-gradient(90deg,#22c55e,#16a34a)}
+button:disabled{opacity:.55;cursor:not-allowed}
+pre{
+  background:#0e1422;border:1px solid var(--stroke);border-radius:10px;
+  padding:12px;margin-top:12px;font-size:12.5px;white-space:pre-wrap;text-align:left;
+  color:#d0d8e6;min-height:110px;
+}
+.loading{animation:blink 1s linear infinite}
+@keyframes blink{50%{opacity:.3}}
+#footer{margin-top:18px;color:#707d93;font-size:12px}
+#footer b{color:var(--accent1)}
 </style>
 </head>
 <body>
-  <div class="card">
-    <h1>THDX Bridge</h1>
-    <p class="sub">LayerZero Mini Bridge • Sepolia → Stable Testnet</p>
+<div class="card">
+  <h1>THDX Bridge</h1>
+  <p class="sub">LayerZero Mini Bridge • Sepolia → Stable Testnet</p>
 
-    <label>Adapter OFT (LayerZero)</label>
-    <input id="adapter" value="0xc099cD946d5efCC35A99D64E808c1430cEf08126">
+  <label>Adapter OFT (LayerZero)</label>
+  <input id="adapter" value="0xc099cD946d5efCC35A99D64E808c1430cEf08126">
 
-    <label>Token (Sepolia)</label>
-    <input id="token" value="0xc4DCC311c028e341fd8602D8eB89c5de94625927">
+  <label>Token (Sepolia)</label>
+  <input id="token" value="0xc4DCC311c028e341fd8602D8eB89c5de94625927">
 
-    <label>dstEid</label>
-    <input id="dstEid" value="40374">
+  <label>dstEid</label>
+  <input id="dstEid" value="40374">
 
-    <label>Jumlah Token</label>
-    <input id="amount" placeholder="mis: 10" inputmode="decimal">
+  <label>Jumlah Token</label>
+  <input id="amount" placeholder="mis: 10" inputmode="decimal">
 
-    <label>Penerima</label>
-    <input id="recipient" placeholder="0x... (otomatis terisi)" />
+  <label>Penerima</label>
+  <input id="recipient" placeholder="0x... (otomatis terisi)" />
 
-    <button id="connect" class="primary">🔌 Connect Wallet</button>
-    <button id="approve" class="primary" disabled>✅ Approve</button>
-    <button id="bridge" class="ok" disabled>🚀 Bridge Now</button>
+  <button id="connect" class="primary">🔌 Connect Wallet</button>
+  <button id="approve" class="primary" disabled>✅ Approve</button>
+  <button id="bridge" class="ok" disabled>🚀 Bridge Now</button>
 
-    <pre id="log">log siap...</pre>
-    <div id="footer">Powered by <b>LayerZero x THDX</b></div>
-  </div>
+  <pre id="log">log siap...</pre>
+  <div id="footer">Powered by <b>LayerZero</b> • Built by <b>THDX</b></div>
+</div>
 
 <script>
 (function loadEthers(){
@@ -96,7 +100,7 @@ function initTHDX(){
 
   async function connect(){
     try{
-      if(!window.ethereum)throw new Error("Buka dengan MetaMask / OKX Wallet");
+      if(!window.ethereum)throw new Error("Buka dengan MetaMask / OKX / Trust Wallet");
       provider=new ethers.providers.Web3Provider(window.ethereum,"any");
       await provider.send("eth_requestAccounts",[]);
       signer=provider.getSigner();me=await signer.getAddress();
@@ -113,11 +117,13 @@ function initTHDX(){
       const token=document.getElementById("token").value.trim();
       const adapter=document.getElementById("adapter").value.trim();
       const amountStr=document.getElementById("amount").value.trim();
+      if(!amountStr)return log("⚠️ Masukkan jumlah token.");
       const amount=ethers.utils.parseUnits(amountStr,"6");
       const erc20=new ethers.Contract(token,ERC20_ABI,signer);
-      log("🧾 Approve LZ...");
+      log("🧾 Approve LZ... ⏳");
       const tx=await erc20.approve(adapter,amount);
-      log(`⏳ Approve TX: ${tx.hash}`);await tx.wait();
+      log(`⏳ Approve TX: ${tx.hash}`);
+      await tx.wait();
       log("✅ Approve sukses!");
     }catch(e){log("❌ Approve error: "+(e.message||e));}
   }
@@ -125,31 +131,26 @@ function initTHDX(){
   async function bridgeNow(){
     try{
       const adapter=document.getElementById("adapter").value.trim();
-      const token=document.getElementById("token").value.trim();
-      const dstEid=Number(document.getElementById("dstEid").value.trim());
+      const dstEidStr=document.getElementById("dstEid").value.trim();
       const amountStr=document.getElementById("amount").value.trim();
       const recipient=document.getElementById("recipient").value.trim()||me;
+      if(!amountStr)return log("⚠️ Masukkan jumlah token.");
+      const dstEid=Number(dstEidStr);
       const amountLD=ethers.utils.parseUnits(amountStr,"6");
       const to32=addr32(recipient);
       const oft=new ethers.Contract(adapter,OFT_ABI,signer);
-
-      const sendParam={
-        dstEid,to:to32,amountLD,minAmountLD:amountLD,
-        extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"
-      };
-      log(`🚀 LZ send validated ✅\ndstEid: ${dstEid}\nto: ${to32}\namountLD: ${amountLD.toString()}`);
-
+      const sendParam={dstEid,to:to32,amountLD,minAmountLD:amountLD,extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"};
+      log(`1️⃣ Estimating fee...`);
       const fee=await oft.quoteSend(sendParam,false);
-      const nativeFee=ethers.BigNumber.from(
-        typeof fee.nativeFee==="string"?fee.nativeFee:fee.nativeFee.toString()
-      );
-      const feeStruct={nativeFee,zroFee:ethers.BigNumber.from(0)};
+      const nativeFee=ethers.BigNumber.from(typeof fee.nativeFee==="string"?fee.nativeFee:fee.nativeFee.toString());
+      const feeStruct=[nativeFee,ethers.BigNumber.from(0)];
       const senderAddr=await signer.getAddress();
-      log(`💰 Fee estimate: ${ethers.utils.formatEther(nativeFee)} ETH`);
-
-      const tx=await oft.send(sendParam,feeStruct,senderAddr,{value:nativeFee,gasLimit:300000});
-      log(`⏳ TX: ${tx.hash}`);await tx.wait();
-      log("✅ Bridge sukses! Tunggu token muncul di Stable Testnet.");
+      log(`💰 Fee: ${ethers.utils.formatEther(nativeFee)} ETH`);
+      log(`2️⃣ Sending transaction...`);
+      const tx=await oft.send(sendParam,feeStruct,senderAddr,{value:nativeFee,gasLimit:350000});
+      log(`⏳ TX: ${tx.hash}`);
+      await tx.wait();
+      log(`✅ Bridge sukses! 🎉 Token akan muncul di Stable Testnet.`);
     }catch(e){
       const msg=(e.error&&e.error.message)||e.reason||e.message||String(e);
       log("❌ Bridge error: "+msg);
