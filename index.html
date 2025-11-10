@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>THDX • LayerZero Bridge v5.3.3</title>
+<title>THDX • LayerZero Bridge v5.3.4</title>
 <meta name="theme-color" content="#0b1220">
 <style>
 :root {
@@ -46,8 +46,6 @@ pre{
   padding:12px;margin-top:12px;font-size:12.5px;white-space:pre-wrap;text-align:left;
   color:#d0d8e6;min-height:110px;
 }
-.loading{animation:blink 1s linear infinite}
-@keyframes blink{50%{opacity:.3}}
 #footer{margin-top:18px;color:#707d93;font-size:12px}
 #footer b{color:var(--accent1)}
 </style>
@@ -133,45 +131,54 @@ function initTHDX(){
       const adapter=document.getElementById("adapter").value.trim();
       const dstEidStr=document.getElementById("dstEid").value.trim();
       const amountStr=document.getElementById("amount").value.trim();
-      const recipient=document.getElementById("recipient").value.trim()||me;
+      const recipient=(document.getElementById("recipient").value.trim()||me).toLowerCase();
       if(!amountStr)return log("⚠️ Masukkan jumlah token.");
+
       const dstEid=Number(dstEidStr);
       const amountLD=ethers.utils.parseUnits(amountStr,"6");
-      const to32=addr32(recipient);
-      const oft=new ethers.Contract(adapter,OFT_ABI,signer);
-      const sendParam={dstEid,to:to32,amountLD,minAmountLD:amountLD,extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"};
-      log(`1️⃣ Estimating fee...`);
+      const to32="0x"+recipient.replace(/^0x/,"").padStart(64,"0");
 
-      const fee=await oft.quoteSend(sendParam,false);
-      // === Force Deep Decode ===
+      const oft=new ethers.Contract(adapter,OFT_ABI,signer);
+
+      // ✅ Tuple as ARRAY (fix invalid BigNumber)
+      const sendParamArr=[
+        dstEid, to32, amountLD, amountLD, "0x", "0x", "0x"
+      ];
+
+      log(`1️⃣ Estimating fee...`);
+      const fee=await oft.quoteSend(sendParamArr,false);
+
+      // 🔍 Deep decode untuk semua format fee
       const extractDeep=(x)=>{
         if(!x)return null;
         if(ethers.BigNumber.isBigNumber(x))return x;
         if(typeof x==="string")return x;
         if(typeof x==="object"){
           if(x._hex)return x._hex;
-          const vals=Object.values(x);
-          for(const v of vals){
-            const res=extractDeep(v);
-            if(res)return res;
+          for(const v of Object.values(x)){
+            const r=extractDeep(v);
+            if(r)return r;
           }
         }
         return null;
       };
       const nativeFeeRaw=extractDeep(fee);
-      if(!nativeFeeRaw)throw new Error("Gagal membaca nativeFee dari kontrak.");
+      if(!nativeFeeRaw)throw new Error("Gagal membaca nativeFee dari quoteSend()");
 
       const nativeFee=ethers.BigNumber.from(
-        ethers.BigNumber.isBigNumber(nativeFeeRaw)
-          ? nativeFeeRaw
-          : (typeof nativeFeeRaw==="string"?nativeFeeRaw:nativeFeeRaw.toString())
+        ethers.BigNumber.isBigNumber(nativeFeeRaw)?nativeFeeRaw:
+        (typeof nativeFeeRaw==="string"?nativeFeeRaw:nativeFeeRaw.toString())
       );
 
-      const feeStruct=[nativeFee,ethers.BigNumber.from(0)];
+      // feeStruct juga ARRAY
+      const feeStructArr=[nativeFee,ethers.BigNumber.from(0)];
       const senderAddr=await signer.getAddress();
+
       log(`💰 Fee: ${ethers.utils.formatEther(nativeFee)} ETH`);
       log(`2️⃣ Sending transaction...`);
-      const tx=await oft.send(sendParam,feeStruct,senderAddr,{value:nativeFee,gasLimit:350000});
+      const tx=await oft.send(sendParamArr,feeStructArr,senderAddr,{
+        value:nativeFee,gasLimit:350000
+      });
       log(`⏳ TX: ${tx.hash}`);
       await tx.wait();
       log(`✅ Bridge sukses! 🎉 Token akan muncul di Stable Testnet.`);
