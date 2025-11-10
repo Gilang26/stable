@@ -3,90 +3,78 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>THDX • Sepolia → Stable Bridge (v5.1 SafeSend)</title>
+<title>THDX • LayerZero Bridge v5.2</title>
 <meta name="theme-color" content="#0b1220" />
 <style>
-  :root{--bg:#0b1220;--card:#121a2a;--muted:#9aa6b2;--stroke:#22304a;--text:#e6edf3;--g1:#6ee7ff;--g2:#7c5cff;--ok1:#16a34a;--ok2:#22c55e;--err:#ef4444}
+  :root {
+    --bg:#0b0e17;--card:#121726;--stroke:#222c42;
+    --text:#e6edf3;--accent1:#7c5cff;--accent2:#6ee7ff;
+    --ok1:#22c55e;--err:#ef4444;
+  }
   *{box-sizing:border-box}
-  body{margin:0;min-height:100svh;display:grid;place-items:center;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial,sans-serif}
-  .wrap{width:min(620px,94vw)}
-  .card{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:18px;box-shadow:0 6px 20px rgba(0,0,0,.35)}
-  h1{margin:0 0 8px;font-size:22px}.sub{margin:0 0 14px;color:var(--muted)}
-  label{display:block;margin:10px 0 6px;color:#cfe3ff;font-weight:600;font-size:13px}
-  select,input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--stroke);background:#0f1625;color:#fff;font-size:14px}
-  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  button{width:100%;padding:12px;border:0;border-radius:10px;color:#fff;font-weight:700;cursor:pointer;transition:.2s;margin-top:10px}
-  .primary{background:linear-gradient(90deg,var(--g1),var(--g2))}.ok{background:linear-gradient(90deg,#16a34a,#22c55e)}
-  .muted{background:#1b263b}button:disabled{opacity:.55;cursor:not-allowed}
-  pre{margin-top:12px;white-space:pre-wrap;background:#0f1625;border:1px solid var(--stroke);border-radius:10px;padding:12px;min-height:120px;font-size:12.5px}
-  #toasts{position:fixed;bottom:18px;right:18px;display:flex;flex-direction:column;gap:10px;z-index:9999}
-  .toast{background:#1c253b;color:#e6e8ff;border-left:5px solid var(--g2);padding:10px 12px;border-radius:10px;box-shadow:0 6px 12px rgba(0,0,0,.35);font-size:13px}
-  .error{border-left-color:var(--err)}
+  body {
+    margin:0;min-height:100svh;display:grid;place-items:center;
+    background:radial-gradient(circle at top,#0e1222,#06080f);
+    color:var(--text);font-family:Inter,system-ui,Arial,sans-serif;
+  }
+  .card {
+    width:min(480px,90vw);background:var(--card);border:1px solid var(--stroke);
+    border-radius:16px;padding:28px;text-align:center;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+    backdrop-filter:blur(10px);
+  }
+  h1 {
+    color:var(--accent1);margin:0;font-size:24px;font-weight:700;
+    background:linear-gradient(90deg,var(--accent1),var(--accent2));
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  p.sub{color:#9aa6b2;margin:6px 0 18px}
+  label{display:block;text-align:left;margin:10px 0 4px;font-size:13px;font-weight:600}
+  input{width:100%;padding:12px;border-radius:10px;border:1px solid var(--stroke);
+    background:#0f1524;color:#fff;font-size:14px}
+  button{
+    width:100%;padding:12px;margin-top:10px;border:0;border-radius:10px;
+    color:#fff;font-weight:700;cursor:pointer;transition:.2s;font-size:15px
+  }
+  button.primary{background:linear-gradient(90deg,var(--accent2),var(--accent1))}
+  button.ok{background:linear-gradient(90deg,#22c55e,#16a34a)}
+  button:disabled{opacity:.55;cursor:not-allowed}
+  pre{
+    background:#0e1422;border:1px solid var(--stroke);border-radius:10px;
+    padding:12px;margin-top:12px;font-size:12.5px;white-space:pre-wrap;text-align:left;
+    color:#d0d8e6;min-height:110px;
+  }
+  #footer{margin-top:18px;color:#707d93;font-size:12px}
+  #footer b{color:var(--accent1)}
 </style>
 </head>
 <body>
-<div class="wrap">
   <div class="card">
-    <h1>THDX • Mini Bridge</h1>
-    <div class="sub">Bridge <b>Sepolia → Stable Testnet</b> (LayerZero / Wormhole)</div>
+    <h1>THDX Bridge</h1>
+    <p class="sub">LayerZero Mini Bridge • Sepolia → Stable Testnet</p>
 
-    <label>Jenis Bridge</label>
-    <select id="bridgeType">
-      <option value="lz">LayerZero OFT (rekomendasi)</option>
-      <option value="wh">Wormhole (opsional)</option>
-    </select>
+    <label>Adapter OFT (LayerZero)</label>
+    <input id="adapter" value="0xc099cD946d5efCC35A99D64E808c1430cEf08126">
 
-    <!-- LayerZero -->
-    <div id="lzBox">
-      <div class="grid2">
-        <div>
-          <label>Token (Sepolia)</label>
-          <input id="lzToken" value="0xc4DCC311c028e341fd8602D8eB89c5de94625927" />
-        </div>
-        <div>
-          <label>OFT Adapter</label>
-          <input id="lzAdapter" value="0xc099cD946d5efCC35A99D64E808c1430cEf08126" />
-        </div>
-      </div>
-      <div class="grid2">
-        <div>
-          <label>dstEid</label>
-          <input id="lzDstEid" value="40374" />
-        </div>
-        <div>
-          <label>Decimals</label>
-          <input id="lzDecimals" value="6" />
-        </div>
-      </div>
-    </div>
+    <label>Token (Sepolia)</label>
+    <input id="token" value="0xc4DCC311c028e341fd8602D8eB89c5de94625927">
 
-    <!-- Wormhole -->
-    <div id="whBox" style="display:none">
-      <div class="grid2">
-        <div><label>Token</label><input id="whToken" placeholder="0x..." /></div>
-        <div><label>Dec</label><input id="whDec" value="6" /></div>
-      </div>
-      <div class="grid2">
-        <div><label>TokenBridge</label><input id="whBridge" value="0x6c5aAE4622B835058A41879bA5e128019B9047d6" /></div>
-        <div><label>dst ChainID</label><input id="whDst" placeholder="31041" /></div>
-      </div>
-    </div>
+    <label>dstEid</label>
+    <input id="dstEid" value="40374">
 
-    <div class="grid2">
-      <div><label>Jumlah</label><input id="amount" placeholder="mis: 10" inputmode="decimal" /></div>
-      <div><label>Penerima</label><input id="recipient" placeholder="0x..." /></div>
-    </div>
+    <label>Jumlah Token</label>
+    <input id="amount" placeholder="mis: 10" inputmode="decimal">
 
-    <div class="grid2">
-      <button id="btnConnect" class="primary">🔌 Connect Wallet</button>
-      <button id="btnApprove" class="muted" disabled>✅ Approve</button>
-    </div>
-    <button id="btnBridge" class="ok" disabled>🚀 Bridge Now</button>
+    <label>Penerima</label>
+    <input id="recipient" placeholder="0x... (otomatis terisi)" />
+
+    <button id="connect" class="primary">🔌 Connect Wallet</button>
+    <button id="approve" class="primary" disabled>✅ Approve</button>
+    <button id="bridge" class="ok" disabled>🚀 Bridge Now</button>
 
     <pre id="log">log siap...</pre>
+    <div id="footer">Powered by <b>LayerZero x THDX</b></div>
   </div>
-</div>
-<div id="toasts"></div>
 
 <script>
 (function loadEthers(){
@@ -97,100 +85,80 @@
 })();
 
 function initTHDX(){
-  const CHAIN_SEPOLIA=11155111;
-  const $=(q)=>document.querySelector(q);
-  const toast=(m,t)=>{const d=document.createElement("div");d.className=`toast ${t||""}`;d.textContent=m;$("#toasts").appendChild(d);setTimeout(()=>d.remove(),3500);}
-  const log=(m)=>{const el=$("#log");el.textContent+=(el.textContent?"\n":"")+m;el.scrollTop=el.scrollHeight;console.log(m);}
-  let provider,signer,me;
-
-  const addrTo32=(addr)=>"0x"+addr.toLowerCase().replace(/^0x/,"").padStart(64,"0");
-  const parseAmount=(v,dec)=>ethers.utils.parseUnits(String(v||"0"),dec);
-
-  const ERC20_ABI=["function approve(address spender,uint256 value) returns(bool)"];
+  const log=(m)=>{const el=document.getElementById("log");el.textContent+=(el.textContent?"\n":"")+m;el.scrollTop=el.scrollHeight;console.log(m);}
+  const addr32=(a)=>"0x"+a.slice(2).padStart(64,"0");
+  const ERC20_ABI=["function approve(address,uint256) returns(bool)"];
   const OFT_ABI=[
     "function quoteSend((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),bool)view returns(uint256 nativeFee,uint256 zroFee)",
     "function send((uint32,bytes32,uint256,uint256,bytes,bytes,bytes),(uint256,uint256),address)payable"
   ];
+  let provider,signer,me;
 
-  async function ensureSepolia(){
-    const net=await provider.getNetwork();
-    if(net.chainId!==CHAIN_SEPOLIA){
-      await provider.send("wallet_switchEthereumChain",[{"chainId":"0xaa36a7"}]);
-    }
-  }
-
-  $("#bridgeType").onchange=()=>{$("#lzBox").style.display=$("#bridgeType").value==="lz"?"block":"none";$("#whBox").style.display=$("#bridgeType").value==="wh"?"block":"none";};
-
-  $("#btnConnect").onclick=async()=>{
+  async function connect(){
     try{
-      if(!window.ethereum)throw new Error("Gunakan browser MetaMask / OKX / Trust");
+      if(!window.ethereum)throw new Error("Buka dengan MetaMask / OKX Wallet");
       provider=new ethers.providers.Web3Provider(window.ethereum,"any");
       await provider.send("eth_requestAccounts",[]);
       signer=provider.getSigner();me=await signer.getAddress();
-      await ensureSepolia();
-      $("#recipient").value=me;
-      $("#btnApprove").disabled=false;$("#btnBridge").disabled=false;
+      document.getElementById("recipient").value=me;
       const net=await provider.getNetwork();
       log(`✅ Connected: ${me}\nChain: ${net.chainId}`);
-    }catch(e){log("❌ Connect error: "+e.message);toast("Gagal connect","error");}
-  };
+      document.getElementById("approve").disabled=false;
+      document.getElementById("bridge").disabled=false;
+    }catch(e){log("❌ Connect error: "+(e.message||e));}
+  }
 
-  $("#btnApprove").onclick=async()=>{
+  async function approve(){
     try{
-      await ensureSepolia();
-      const mode=$("#bridgeType").value;
-      const token=mode==="lz"?$("#lzToken").value.trim():$("#whToken").value.trim();
-      const spender=mode==="lz"?$("#lzAdapter").value.trim():$("#whBridge").value.trim();
-      const dec=parseInt(mode==="lz"?$("#lzDecimals").value:$("#whDec").value);
-      const amountLD=parseAmount($("#amount").value.trim(),dec);
+      const token=document.getElementById("token").value.trim();
+      const adapter=document.getElementById("adapter").value.trim();
+      const amountStr=document.getElementById("amount").value.trim();
+      const amount=ethers.utils.parseUnits(amountStr,"6");
       const erc20=new ethers.Contract(token,ERC20_ABI,signer);
-      log(`🧾 Approve ${mode.toUpperCase()}...`);
-      const tx=await erc20.approve(spender,amountLD);
-      log(`⏳ Approve TX: ${tx.hash}`);await tx.wait();log("✅ Approve sukses!");
-    }catch(e){log("❌ Approve error: "+(e.message||e));toast("Approve gagal","error");}
-  };
+      log("🧾 Approve LZ...");
+      const tx=await erc20.approve(adapter,amount);
+      log(`⏳ Approve TX: ${tx.hash}`);await tx.wait();
+      log("✅ Approve sukses!");
+    }catch(e){log("❌ Approve error: "+(e.message||e));}
+  }
 
-  $("#btnBridge").onclick=async()=>{
+  async function bridgeNow(){
     try{
-      await ensureSepolia();
-      const mode=$("#bridgeType").value;
-      const recipient=($("#recipient").value||me).trim().toLowerCase();
-      if(!/^0x[0-9a-f]{40}$/.test(recipient))throw new Error("Alamat penerima tidak valid");
+      const adapter=document.getElementById("adapter").value.trim();
+      const token=document.getElementById("token").value.trim();
+      const dstEid=Number(document.getElementById("dstEid").value.trim());
+      const amountStr=document.getElementById("amount").value.trim();
+      const recipient=document.getElementById("recipient").value.trim()||me;
+      const amountLD=ethers.utils.parseUnits(amountStr,"6");
+      const to32=addr32(recipient);
+      const oft=new ethers.Contract(adapter,OFT_ABI,signer);
 
-      if(mode==="lz"){
-        const adapter=$("#lzAdapter").value.trim();
-        const dstEid=ethers.BigNumber.from($("#lzDstEid").value.trim());
-        const dec=parseInt($("#lzDecimals").value||"6");
-        const amountStr=$("#amount").value.trim();
-        const amountLD=ethers.BigNumber.from(ethers.utils.parseUnits(amountStr,dec));
-        const to32=addrTo32(recipient);
+      const sendParam={
+        dstEid,to:to32,amountLD,minAmountLD:amountLD,
+        extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"
+      };
+      log(`🚀 LZ send validated ✅\ndstEid: ${dstEid}\nto: ${to32}\namountLD: ${amountLD.toString()}`);
 
-        const sendParam={dstEid,to:to32,amountLD, minAmountLD:amountLD, extraOptions:"0x",composeMsg:"0x",oftCmd:"0x"};
-        log(`🚀 LZ send validated ✅
-dstEid: ${dstEid.toString()}
-to: ${to32}
-amountLD: ${amountLD.toString()}`);
+      const fee=await oft.quoteSend(sendParam,false);
+      const nativeFee=ethers.BigNumber.from(
+        typeof fee.nativeFee==="string"?fee.nativeFee:fee.nativeFee.toString()
+      );
+      const feeStruct={nativeFee,zroFee:ethers.BigNumber.from(0)};
+      const senderAddr=await signer.getAddress();
+      log(`💰 Fee estimate: ${ethers.utils.formatEther(nativeFee)} ETH`);
 
-        const oft=new ethers.Contract(adapter,OFT_ABI,signer);
-        const fee=await oft.quoteSend(sendParam,false);
-
-        // 🔧 FIX: pastikan fee benar-benar BigNumber
-        const nativeFee=ethers.BigNumber.from(
-          typeof fee.nativeFee==="string"?fee.nativeFee:fee.nativeFee.toString()
-        );
-        const feeStruct={nativeFee,zroFee:ethers.BigNumber.from(0)};
-
-        log(`💰 Fee estimate: ${ethers.utils.formatEther(nativeFee)} ETH`);
-        const tx=await oft.send(sendParam,feeStruct,me,{value:nativeFee,gasLimit:300000});
-        log(`⏳ TX: ${tx.hash}`);await tx.wait();
-        log("✅ Bridge (OFT) sukses! Tunggu penerimaan di Stable testnet.");
-      }
+      const tx=await oft.send(sendParam,feeStruct,senderAddr,{value:nativeFee,gasLimit:300000});
+      log(`⏳ TX: ${tx.hash}`);await tx.wait();
+      log("✅ Bridge sukses! Tunggu token muncul di Stable Testnet.");
     }catch(e){
       const msg=(e.error&&e.error.message)||e.reason||e.message||String(e);
       log("❌ Bridge error: "+msg);
-      if(/invalid BigNumber/i.test(msg))log("🔍 Debug: semua nilai BigNumber sekarang dipaksa konversi string.");
     }
-  };
+  }
+
+  document.getElementById("connect").onclick=connect;
+  document.getElementById("approve").onclick=approve;
+  document.getElementById("bridge").onclick=bridgeNow;
 }
 </script>
 </body>
